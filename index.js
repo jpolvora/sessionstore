@@ -1,1 +1,3 @@
-module.exports = require('./lib/session-store')
+const SessionStore = require('./lib/session-store')
+
+module.exports = SessionStore;
