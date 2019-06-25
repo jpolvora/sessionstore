@@ -11,29 +11,39 @@ tested with node.js 10.x
 Initializing
 
 ```javascript
-const SessionStore = require('session-store')
-const app = express()
+(async () {
+    const mongoose = require('mongoose');
+    /* requires mongoose connection */
+    await mongoose.connect(process.env.MONGODB_URI);
 
-const sessionStore = new SessionStore({
-    secret: process.env.SESSION_SECRET,
-    store: {
-        type: 'mongoose',
-        uri: process.env.MONGODB_URI,
-        collectionName: '_sesions'
+    const SessionStore = require('session-store')
+    const app = express()
+
+    /* requires cookie parser */
+    app.use(cookieParser(process.env.SESSION_SECRET));
+
+    const sessionStore = new SessionStore({
+        secret: process.env.SESSION_SECRET,
+        store: {
+            type: 'mongoose',
+            mongoose: mongoose //your working mongoose connection here
+        }
+    })
+
+    /* not required: simple logger function */
+    function log(eventName) {
+        return (...args) => {
+            console.debug(eventName, ...args);
+        }
     }
-})
 
-function log(eventName) {
-    return (...args) => {
-        console.debug(eventName, ...args);
-    }
-}
+    /*not required: listening to available events*/
+    sessionStore.on('session_started', log('session_started'))
+    sessionStore.on('session_stored', log('session_stored'))
+    sessionStore.on('session_destroyed', log('session_destroyed'))
 
-sessionStore.on('session_started', log('session_started'))
-sessionStore.on('session_stored', log('session_stored'))
-sessionStore.on('session_destroyed', log('session_destroyed'))
-
-app.use(sessionStore.middleware);
+    app.use(sessionStore.middleware);
+})()
 ```
 
 ## Store Persistence
