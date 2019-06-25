@@ -1,0 +1,1 @@
+module.exports.sessionstore = require('./lib/session-store')
