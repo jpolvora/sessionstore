@@ -7,14 +7,15 @@ const SessionStore = require('./lib/session-store');
 const COLLECTION_NAME = "_sess";
 (async () => {
   await mongoose.connect("mongodb://localhost/sessionstore-tests", {
-    useNewUrlParser: true
+    useNewUrlParser: true,
+    useCreateIndex: true
   });
 
   //await mongoose.connection.db.dropCollection(COLLECTION_NAME)
   const app = express();
+  app.use(express.static('/favicon.ico'));
   app.use(cookieParser("mysecret"));
   const sessionStore = new SessionStore({
-    secret: "mysecret",
     store: {
       type: 'mongoose',
       collectionName: COLLECTION_NAME,
@@ -37,22 +38,32 @@ const COLLECTION_NAME = "_sess";
   app.use(sessionStore.middleware);
 
   app.use((req, res) => {
+    req.session.myCount = (req.session.myCount || 0) + 1
     return res.json({
       success: true,
-      message: "hello world!"
+      message: "hello world!" + req.session.myCount
     });
   })
 
   app.listen(3000, () => {
+    const j = request.jar();
     const fn = request.defaults({ jar: true });
-    let count = 3;
-    while (count > 0) {
+    let count = 345;
+    const timer = setInterval(() => {
       count--
-      fn('http://localhost:3000/', function (err, res, body) {
+      if (count === 0) return clearInterval(timer);
+      fn({
+        url: 'http://localhost:3000/',
+        jar: j
+      }, function (err, res, body) {
         if (err) throw err;
-        console.log(res.headers['set-cookie'][0])
+        if (res.headers['set-cookie'] && res.headers['set-cookie'].length > 0) {
+          const cookie = request.cookie(res.headers['set-cookie'][0]);
+          j.setCookie(cookie);
+        }
+        console.log('requests:' + count)
       });
-    }
+    }, 1000);
 
   });
 })()
