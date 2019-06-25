@@ -1,1 +1,1 @@
-module.exports.sessionstore = require('./lib/session-store')
+module.exports = require('./lib/session-store')
