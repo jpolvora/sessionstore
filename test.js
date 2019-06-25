@@ -37,18 +37,26 @@ const COLLECTION_NAME = "_sess";
 
   app.use(sessionStore.middleware);
 
-  app.use((req, res) => {
+  app.get('/', (req, res) => {
     req.session.myCount = (req.session.myCount || 0) + 1
-    return res.json({
-      success: true,
-      message: "hello world!" + req.session.myCount
+    req.session.save(() => {
+      return res.json({
+        success: true,
+        message: "hello world!" + req.session.myCount
+      });
+    });
+  })
+
+  app.get('/destroy', (req, res) => {
+    req.session.destroy(() => {
+      return res.redirect('/');
     });
   })
 
   app.listen(3000, () => {
     const j = request.jar();
     const fn = request.defaults({ jar: true });
-    let count = 345;
+    let count = 1;
     const timer = setInterval(() => {
       count--
       if (count === 0) return clearInterval(timer);
@@ -63,7 +71,7 @@ const COLLECTION_NAME = "_sess";
         }
         console.log('requests:' + count)
       });
-    }, 1000);
+    }, 100);
 
   });
 })()
