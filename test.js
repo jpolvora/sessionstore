@@ -27,14 +27,16 @@ const COLLECTION_NAME = "_sess";
   /* not required: simple logger function */
   function log(eventName) {
     return (...args) => {
-      console.debug(eventName, ...args);
+      console.debug('sessionstore events:' + eventName, ...args);
     }
   }
 
+  sessionStore.on('init', log('init'))
   sessionStore.on('session_started', log('session_started'))
   sessionStore.on('session_stored', log('session_stored'))
   sessionStore.on('session_destroyed', log('session_destroyed'))
 
+  await sessionStore.init();
   app.use(sessionStore.middleware);
 
   app.get('/', (req, res) => {
