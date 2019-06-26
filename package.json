@@ -1,6 +1,6 @@
 {
   "name": "sessionstore",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Express Middleware for Enabling Sessions with Mongoose",
   "main": "index.js",
   "scripts": {},

@@ -8,7 +8,8 @@ const COLLECTION_NAME = "_sess";
 (async () => {
   await mongoose.connect("mongodb://localhost/sessionstore-tests", {
     useNewUrlParser: true,
-    useCreateIndex: true
+    useCreateIndex: true,
+    useFindAndModify: true
   });
 
   //await mongoose.connection.db.dropCollection(COLLECTION_NAME)
@@ -58,10 +59,10 @@ const COLLECTION_NAME = "_sess";
   app.listen(3000, () => {
     const j = request.jar();
     const fn = request.defaults({ jar: true });
-    let count = 1;
+    let count = 100;
     const timer = setInterval(() => {
-      count--
       if (count === 0) return clearInterval(timer);
+      count--;
       fn({
         url: 'http://localhost:3000/',
         jar: j

@@ -13,8 +13,13 @@ Initializing
 ```javascript
 (async () {
     const mongoose = require('mongoose');
+
     /* requires mongoose connection */
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect("mongodb://localhost/sessionstore-tests", {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useFindAndModify: true
+    });
 
     const SessionStore = require('session-store')
     const app = express()
@@ -41,7 +46,7 @@ Initializing
     sessionStore.on('session_started', log('session_started'))
     sessionStore.on('session_stored', log('session_stored'))
     sessionStore.on('session_destroyed', log('session_destroyed'))
-
+    await sessionStore.init();
     app.use(sessionStore.middleware);
 })()
 ```
@@ -68,20 +73,22 @@ module.exports = function() {
         },
 
         getSession: async function(sessionKey) {
-            return {
-                _key: '',
-                _hash: ''
+            const sessionData = {
+                _id: uuid()
             }
+            return sessionData;
         },
 
         createOrUpdateSession: async function(key, value) {
-            return true;
+            return key;
         },
 
         destroySession: async function(key) {
-
+            return true;
         }
     }
 }
 ```
+
+### See test.js in order to learn more about usage.
 
