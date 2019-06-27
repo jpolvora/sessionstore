@@ -3,16 +3,33 @@ const request = require('request');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const SessionStore = require('./lib/session-store');
+const debug = require('debug');
+console.log('debug:', process.env.DEBUG);
+const logger = debug('tests')
+debug.enable('tests');
+debug.enable('sessionstore');
 
 const COLLECTION_NAME = "_sess";
 (async () => {
   await mongoose.connect("mongodb://localhost/sessionstore-tests", {
     useNewUrlParser: true,
     useCreateIndex: true,
-    useFindAndModify: true
+    useFindAndModify: false
   });
+  try {
+    await new Promise((resolve, reject) => {
 
-  //await mongoose.connection.db.dropCollection(COLLECTION_NAME)
+      mongoose.connection.db.dropCollection(COLLECTION_NAME, (err) => {
+        if (err) return reject(err);
+        return resolve(true);
+      });
+    });
+
+  } catch (error) {
+    logger("error on droping collection", error);
+  }
+
+
   const app = express();
   app.use(express.static('/favicon.ico'));
   app.use(cookieParser("mysecret"));
@@ -28,7 +45,7 @@ const COLLECTION_NAME = "_sess";
   /* not required: simple logger function */
   function log(eventName) {
     return (...args) => {
-      console.debug('sessionstore events:' + eventName, ...args);
+      return logger('sessionstore events:' + eventName, ...args);
     }
   }
 
@@ -65,7 +82,12 @@ const COLLECTION_NAME = "_sess";
       count--;
       fn({
         url: 'http://localhost:3000/',
-        jar: j
+        jar: j,
+        removeRefererHeader: true,
+        headers: {
+          'Accept': 'Accept: text/*, application/json'
+          //'Accept': 'jpeg'
+        }
       }, function (err, res, body) {
         if (err) throw err;
         if (res.headers['set-cookie'] && res.headers['set-cookie'].length > 0) {
