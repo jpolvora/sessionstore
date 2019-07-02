@@ -41,7 +41,7 @@ const COLLECTION_NAME = '_sess';
   });
 
   /* not required: simple logger function */
-  function log (eventName) {
+  function log(eventName) {
     return (...args) => {
       return logger('sessionstore events:' + eventName, ...args);
     };
@@ -55,18 +55,20 @@ const COLLECTION_NAME = '_sess';
   await sessionStore.init();
   app.use(sessionStore.middleware);
 
-  app.get('/', (req, res) => {
+  app.get('/', async (req, res) => {
     req.session.myCount = (req.session.myCount || 0) + 1;
-    req.session.save(() => {
-      return res.json({
-        success: true,
-        message: 'hello world!' + req.session.myCount
-      });
+    await req.session.save(() => {
+
+    });
+
+    return res.json({
+      success: true,
+      message: 'hello world!' + req.session.myCount
     });
   });
 
-  app.get('/destroy', (req, res) => {
-    req.session.destroy(() => {
+  app.get('/destroy', async (req, res) => {
+    await req.session.destroy(() => {
       return res.redirect('/');
     });
   });
@@ -107,11 +109,11 @@ const COLLECTION_NAME = '_sess';
     });
   };
 
-  function createFunction (url, i, cookie) {
+  function createFunction(url, i, cookie) {
     return () => createRequest(url + '?count=' + i, cookie);
   }
 
-  async function executeRequests (count, url, cookie, paralel) {
+  async function executeRequests(count, url, cookie, paralel) {
     const functions = [];
 
     for (let i = 0; i < count; i++) {
