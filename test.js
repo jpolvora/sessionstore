@@ -41,7 +41,7 @@ const COLLECTION_NAME = '_sess';
   });
 
   /* not required: simple logger function */
-  function log(eventName) {
+  function log (eventName) {
     return (...args) => {
       return logger('sessionstore events:' + eventName, ...args);
     };
@@ -109,11 +109,11 @@ const COLLECTION_NAME = '_sess';
     });
   };
 
-  function createFunction(url, i, cookie) {
+  function createFunction (url, i, cookie) {
     return () => createRequest(url + '?count=' + i, cookie);
   }
 
-  async function executeRequests(count, url, cookie, paralel) {
+  async function executeRequests (count, url, cookie, paralel) {
     const functions = [];
 
     for (let i = 0; i < count; i++) {
